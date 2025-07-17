@@ -245,12 +245,12 @@ class ATLAS:
 
             # Save to file
             with open(stix_output_filepath, 'w') as f:
-                json.dump(self.existing_stix_json, f)
+                json.dump(self.existing_stix_json, f, indent=4)
 
         else:
             # Save to file
             with open(stix_output_filepath, 'w') as f:
-                json.dump(stix_json, f)
+                json.dump(stix_json, f, indent=4)
 
         print(f'Done! See {stix_output_filepath}\n')
 
@@ -307,6 +307,8 @@ class ATLAS:
             description=t['description'],
             external_references=self.build_atlas_external_references(t, atlas_url, 'tactics'),
             x_mitre_shortname=t['name'].lower().replace(' ','-'),
+            allow_custom=True,
+            x_mitre_domains=['atlas-atlas']
         )
 
         # Track this tactic by short ID
@@ -323,7 +325,8 @@ class ATLAS:
             external_references=self.build_atlas_external_references(t, atlas_url),
             # Needed by Navigator else TypeError technique.platforms is not iterable
             allow_custom=True,
-            x_mitre_platforms=['ATLAS']
+            x_mitre_platforms=['ATLAS'],
+            x_mitre_domains=['atlas-atlas']            
         )
 
     def subtechnique_to_attack_pattern(self, t, parent, atlas_url):
@@ -340,6 +343,7 @@ class ATLAS:
             # Needed by Navigator else TypeError technique.platforms is not iterable
             allow_custom=True,
             x_mitre_platforms=['ATLAS'],
+            x_mitre_domains=['atlas-atlas'],            
             x_mitre_is_subtechnique=True
         )
 
@@ -368,10 +372,9 @@ class ATLAS:
         # A mitigation may optionally have associated technique uses
         if 'techniques' in m:
             for technique_use in m['techniques']:
-                # technique is { id: , use: }
-                stix_technique = self.find_stix_technique_by_external_ref_id(stix_techniques, technique_use['id'])
-
-                if stix_technique:
+                if stix_technique := self.find_stix_technique_by_external_ref_id(
+                    stix_techniques, technique_use['id']
+                ):
                     relationship = Relationship(
                         source_ref=mitigation.id,
                         relationship_type='mitigates',
@@ -389,8 +392,10 @@ def get_latest_attack_stix_json(domain='enterprise-attack'):
     Domain should be 'enterprise-attack', 'mobile-attack' or 'ics-attack'. Branch should typically be master.
     Adapted from https://github.com/mitre-attack/attack-stix-data/blob/master/USAGE.md#accessing-attck-data-in-python
     """
-    stix_json = requests.get(f"https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/{domain}/{domain}.json", verify=False).json()
-    return stix_json
+    return requests.get(
+        f"https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/{domain}/{domain}.json",
+        verify=False,
+    ).json()
 
 if __name__ == '__main__':
     """Main entry point to STIX file generation for ATLAS data."""
