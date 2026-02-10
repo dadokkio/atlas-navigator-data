@@ -11,7 +11,7 @@
         },
         {
             "name": "atlas_data_version",
-            "value": "5.0.1"
+            "value": "5.4.0"
         }
     ],
     "name": "Morris II Worm: RAG-Based Attack",
@@ -39,7 +39,7 @@
             "color": "#C8E6C9"
         },
         {
-            "techniqueID": "AML.T0051.001",
+            "techniqueID": "AML.T0051.002",
             "color": "#C8E6C9"
         },
         {
