@@ -194,7 +194,7 @@ class ATLAS:
 
         # Create new properties for collection use
         # Store current datetime
-        curr_datetime = datetime.datetime.utcnow()
+        curr_datetime = datetime.datetime.now(datetime.timezone.utc)
         # Identity for this script's user and URL
         identity_uuid = uuid.uuid5(self.uuid_domain, "ATLAS-identity")
         identity = Identity(id=f"identity--{identity_uuid}", name=identity_name, description=atlas_url)
@@ -218,7 +218,7 @@ class ATLAS:
             # Loop through data objects to store their references in this collection
             x_mitre_contents = [{ 'object_ref': obj.id, 'object_modified': obj.modified } for obj in stix_data_objects]
         )
-        print(f'Created STIX collection object.')
+        print('Created STIX collection object.')
 
         # JSON
         print('Bundling and serializing ATLAS data to JSON file...')
@@ -298,7 +298,7 @@ class ATLAS:
         """Returns a STIX External Reference for ATLAS data."""
 
         # Construct the full URL to the resource
-        url = atlas_url + '/' + route + '/' + t['id']
+        url = f'{atlas_url}/{route}/' + t['id']
 
         # External references is a list
         return [
@@ -401,10 +401,9 @@ class ATLAS:
         # A mitigation may optionally have associated technique uses
         if 'techniques' in m:
             for technique_use in m['techniques']:
-                # technique is { id: , use: }
-                stix_technique = self.find_stix_technique_by_external_ref_id(stix_techniques, technique_use['id'])
-
-                if stix_technique:
+                if stix_technique := self.find_stix_technique_by_external_ref_id(
+                    stix_techniques, technique_use['id']
+                ):
                     relationship_uuid = uuid.uuid5(self.uuid_domain, f"{m['id']}-mitigates-{technique_use['use']}")
                     relationship = Relationship(
                         id=f"relationship--{relationship_uuid}",
